@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+</head>
+<body>
+<input type="text" id="send_text" > </input>
+<button onclick="send_info()"> 發送訊息 </button>
+<button onclick="revice_info()"> 獲得伺服器資訊 </button>
+<button onclick="close_socket()"> 關閉socket </button>
+</body>
+<script>
+let ws = new WebSocket('ws://localhost:3000/ws/chat'); //連接到websocket
+
+function send_info(e){ //傳訊息給伺服器
+   let text = document.getElementById("send_text"); 
+   console.log(text.value);
+   ws.send(text.value); //送訊息到 node socket on('message')
+}
+
+function revice_info(){ //從伺服器獲得伺服器給的資訊
+    // console.log('revice');
+     ws.onmessage =  function(msg)  //從服務器收到消息時要調用的事件偵聽器
+    {  //回乎函數
+         console.log(msg.data); //獲得伺服器傳來的值
+    };
+}
+function close_socket(){ //中斷連線
+    console.log('socket中斷連線');
+    ws.close();
+}
+
+   </script>
+</html>
