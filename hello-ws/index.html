@@ -7,29 +7,56 @@
 <body>
 <input type="text" id="send_text" > </input>
 <button onclick="send_info()"> 發送訊息 </button>
-<button onclick="revice_info()"> 獲得伺服器資訊 </button>
+<button onclick="revice_info()"> 獲得伺服器回應 </button>
+<button onclick="reopen_socket()"> 重新連線socket </button>
 <button onclick="close_socket()"> 關閉socket </button>
+<div id="output"></div>  <!-- 放回應的文字 -->
 </body>
 <script>
 let ws = new WebSocket('ws://localhost:3000/ws/chat'); //連接到websocket
+let output = document.getElementById("output"); // 放回應的文字
 
 function send_info(e){ //傳訊息給伺服器
    let text = document.getElementById("send_text"); 
-   console.log(text.value);
-   ws.send(text.value); //送訊息到 node socket on('message')
+   console.log(text.value); //拿到輸入值
+
+   if(text.value!=null && text.value.length!=0){ //沒有輸入時不能發送訊息到伺服器
+    doSend(text.value); //送訊息到 node socket on('message')
+   }
+   
 }
 
-function revice_info(){ //從伺服器獲得伺服器給的資訊
-    // console.log('revice');
-     ws.onmessage =  function(msg)  //從服務器收到消息時要調用的事件偵聽器
-    {  //回乎函數
-         console.log(msg.data); //獲得伺服器傳來的值
-    };
+function doSend(message){  //記訊息給伺服器 
+        writeToScreen("SENT: " + message);
+        ws.send(message); //實際執行的函數 
+    }  
+
+function writeToScreen(message) { //打印在螢幕上
+    var pre = document.createElement("p"); //創建元素
+    pre.style.wordWrap = "break-word"; //css style
+    pre.innerHTML = message; //把訊息加入到新創元素
+    output.appendChild(pre); //在後顯示在畫面本來的div
+}  
+function revice_info() {
+    ws.onmessage =  function(evt) {    //實際從伺服器收到的訊息
+
+        setTimeout(() => { //每秒調用匿名函數
+            writeToScreen(evt.data); // 獲得響應後寫在畫面上
+        }, 500);
+
+        console.log(evt.data); //獲得伺服器傳來的值 
+    }; 
+}
+function reopen_socket(){ //重新連線
+    console.log('socket重新連線');
+    output.innerHTML="";//清空div上的文字
+    ws = new WebSocket('ws://localhost:3000/ws/chat'); //連接到websocket
 }
 function close_socket(){ //中斷連線
     console.log('socket中斷連線');
     ws.close();
 }
+
 
    </script>
 </html>
